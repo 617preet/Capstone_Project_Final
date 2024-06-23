@@ -1,71 +1,64 @@
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
 
 public class Driver {
-    // Instance variables (if needed)
+    // Instance variables
     private static ArrayList<Dog> dogList = new ArrayList<>();
     private static ArrayList<Monkey> monkeyList = new ArrayList<>();
-    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        // Initialize lists from database
         initializeDogList();
         initializeMonkeyList();
 
+        // Sort the lists by name for binary search
+        Collections.sort(dogList, Comparator.comparing(Dog::getName));
+        Collections.sort(monkeyList, Comparator.comparing(Monkey::getName));
+
         // Controls the menu traversal
         boolean acceptingInput = true;
+        Scanner input = new Scanner(System.in);
 
         do {
             displayMenu();
-            String option = scanner.nextLine().trim().toLowerCase();
+            String option = input.nextLine().trim().toLowerCase();
 
-            switch(option) {
+            switch (option) {
                 case "1":
                     // Input a new dog
-                    intakeNewDog(scanner);
+                    intakeNewDog(input);
                     break;
-
                 case "2":
                     // Input a new monkey
-                    intakeNewMonkey(scanner);
+                    intakeNewMonkey(input);
                     break;
-
                 case "3":
                     // Reserve an animal
-                    reserveAnimal(scanner);
+                    reserveAnimal(input);
                     break;
-
                 case "4":
-                    // Print all dogs
-                    printAllDogs();
+                    // Print all of the dogs
+                    printAnimals("dog");
                     break;
-
                 case "5":
-                    // Print all monkeys
-                    printAllMonkeys();
+                    // Print all of the monkeys
+                    printAnimals("monkey");
                     break;
-
                 case "6":
                     // Print all non-reserved animals
-                    printAvailableAnimals();
+                    printAnimals("available");
                     break;
-
                 case "q":
                     // Quit
                     acceptingInput = false;
                     break;
-
                 default:
                     System.out.println("Invalid option, please input a valid option");
                     break;
             }
-        } while(acceptingInput);
+        } while (acceptingInput);
 
         System.out.println("Goodbye");
     }
@@ -85,198 +78,192 @@ public class Driver {
         System.out.println("Enter a menu selection");
     }
 
-    // Adds dogs to a list from database
+    // Adds dogs to a list for testing
     public static void initializeDogList() {
-        // Fetch dogs from database and add to dogList
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        Dog dog1 = new Dog("Spot", "German Shepherd", "male", "1", "25.6", "05-12-2019", "United States", "intake", false, "United States");
+        Dog dog2 = new Dog("Rex", "Great Dane", "male", "3", "35.2", "02-03-2020", "United States", "Phase I", false, "United States");
+        Dog dog3 = new Dog("Bella", "Chihuahua", "female", "4", "25.6", "12-12-2019", "Canada", "in service", true, "Canada");
 
-        try {
-            conn = DatabaseUtil.getConnection();
-            String query = "SELECT * FROM Dog";
-            ps = conn.prepareStatement(query);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String breed = rs.getString("breed");
-                String gender = rs.getString("gender");
-                String age = rs.getString("age");
-                String weight = rs.getString("weight");
-                String acquisitionDate = rs.getString("acquisitionDate");
-                String acquisitionCountry = rs.getString("acquisitionCountry");
-                String trainingStatus = rs.getString("trainingStatus");
-                boolean reserved = rs.getBoolean("reserved");
-                String inServiceCountry = rs.getString("inServiceCountry");
-
-                Dog dog = new Dog(name, breed, gender, age, weight, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry);
-                dogList.add(dog);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseUtil.closeResources(conn, ps, rs);
-        }
+        dogList.add(dog1);
+        dogList.add(dog2);
+        dogList.add(dog3);
     }
 
-    // Adds monkeys to a list from database
+    // Adds monkeys to a list for testing (optional)
     public static void initializeMonkeyList() {
-        // Fetch monkeys from database and add to monkeyList
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        Monkey monkey1 = new Monkey("Cappy", "Capuchin", "male", "1", "5.6", "15", "10", "5", "05-21-2021", "United States", "intake", false, "United States");
+        Monkey monkey2 = new Monkey("Max", "Macaque", "male", "3", "15.2", "63", "53", "10", "02-29-2002", "United States", "Phase I", false, "United States");
+        Monkey monkey3 = new Monkey("Tammy", "Tamarin", "female", "4", "1.6", "9", "1", "0.6", "12-21-2012", "Canada", "in service", false, "Canada");
 
-        try {
-            conn = DatabaseUtil.getConnection();
-            String query = "SELECT * FROM Monkey";
-            ps = conn.prepareStatement(query);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String species = rs.getString("species");
-                String gender = rs.getString("gender");
-                String age = rs.getString("age");
-                String weight = rs.getString("weight");
-                String height = rs.getString("height");
-                String bodyLength = rs.getString("bodyLength");
-                String tailLength = rs.getString("tailLength");
-                String acquisitionDate = rs.getString("acquisitionDate");
-                String acquisitionCountry = rs.getString("acquisitionCountry");
-                String trainingStatus = rs.getString("trainingStatus");
-                boolean reserved = rs.getBoolean("reserved");
-                String inServiceCountry = rs.getString("inServiceCountry");
-
-                Monkey monkey = new Monkey(name, species, gender, age, weight, height, bodyLength, tailLength, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry);
-                monkeyList.add(monkey);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseUtil.closeResources(conn, ps, rs);
-        }
+        monkeyList.add(monkey1);
+        monkeyList.add(monkey2);
+        monkeyList.add(monkey3);
     }
 
-    // Adds a new dog to database and list
+    // Adds a new dog to `dogList`
     public static void intakeNewDog(Scanner scanner) {
         System.out.println("What is the dog's name?");
         String name = scanner.nextLine().trim();
 
+        // Ensure the dog isn't a duplicate
         if (findDogByName(name) != null) {
             System.out.println("\n\nThis dog is already in our system\n\n");
             return;
         }
 
+        // Gather information about the new dog
         System.out.println("What is " + name + "'s breed?");
         String breed = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s gender? (\"male\", \"female\")");
         String gender = scanner.nextLine().trim().toLowerCase();
+
         System.out.println("What is " + name + "'s age?");
         String age = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s weight? (in pounds)");
         String weight = scanner.nextLine().trim();
+
         System.out.println("When was " + name + "'s acquired? (MM-DD-YYYY)");
         String acquisitionDate = scanner.nextLine().trim();
+
         System.out.println("Where was " + name + "'s acquired? (Country)");
         String acquisitionCountry = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s training status? (\"intake\", \"in service\", \"phase I/II/III/IV/V\", \"farm\")");
         String trainingStatus = scanner.nextLine().trim();
+
         System.out.println("Is " + name + " reserved? (Y/N)");
         boolean reserved = scanner.nextLine().trim().equalsIgnoreCase("Y");
+
         System.out.println("What is " + name + "'s service country?");
         String inServiceCountry = scanner.nextLine().trim();
 
+        // Create a new dog and add it to the list
         Dog newDog = new Dog(name, breed, gender, age, weight, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry);
-        addDogToDatabase(newDog);
         dogList.add(newDog);
-        System.out.println("Dog " + name + " added successfully.");
+        Collections.sort(dogList, Comparator.comparing(Dog::getName));
     }
 
-    // Adds a new monkey to database and list
+    // Adds a new monkey to `monkeyList`
     public static void intakeNewMonkey(Scanner scanner) {
         System.out.println("What is the monkey's name?");
         String name = scanner.nextLine().trim();
 
+        // Ensure the monkey isn't a duplicate
         if (findMonkeyByName(name) != null) {
             System.out.println("\n\nThis monkey is already in our system\n\n");
             return;
         }
 
+        // Gather information about the new monkey
         System.out.println("What is " + name + "'s species?");
         String species = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s gender? (\"male\", \"female\")");
         String gender = scanner.nextLine().trim().toLowerCase();
+
         System.out.println("What is " + name + "'s age?");
         String age = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s weight? (in pounds)");
         String weight = scanner.nextLine().trim();
-        System.out.println("What is " + name + "'s height? (head to toe; in inches)");
+
+        System.out.println("What is " + name + "'s height? (inches)");
         String height = scanner.nextLine().trim();
-        System.out.println("What is " + name + "'s body length? (head to pelvis; in inches)");
+
+        System.out.println("What is " + name + "'s body length? (inches)");
         String bodyLength = scanner.nextLine().trim();
-        System.out.println("What is " + name + "'s tail length? (base to tip; in inches)");
+
+        System.out.println("What is " + name + "'s tail length? (inches)");
         String tailLength = scanner.nextLine().trim();
-        System.out.println("When was " + name + "'s acquired? (MM-DD-YYYY)");
+
+        System.out.println("When was " + name + " acquired? (MM-DD-YYYY)");
         String acquisitionDate = scanner.nextLine().trim();
-        System.out.println("Where was " + name + "'s acquired? (Country)");
+
+        System.out.println("Where was " + name + " acquired? (Country)");
         String acquisitionCountry = scanner.nextLine().trim();
+
         System.out.println("What is " + name + "'s training status? (\"intake\", \"in service\", \"phase I/II/III/IV/V\", \"farm\")");
         String trainingStatus = scanner.nextLine().trim();
+
         System.out.println("Is " + name + " reserved? (Y/N)");
         boolean reserved = scanner.nextLine().trim().equalsIgnoreCase("Y");
+
         System.out.println("What is " + name + "'s service country?");
         String inServiceCountry = scanner.nextLine().trim();
 
+        // Create a new monkey and add it to the list
         Monkey newMonkey = new Monkey(name, species, gender, age, weight, height, bodyLength, tailLength, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry);
-        addMonkeyToDatabase(newMonkey);
         monkeyList.add(newMonkey);
-        System.out.println("Monkey " + name + " added successfully.");
+        Collections.sort(monkeyList, Comparator.comparing(Monkey::getName));
     }
 
- // Reserves an animal (by type and country)
+    // Reserves an animal based on user input
     public static void reserveAnimal(Scanner scanner) {
-        System.out.println("Enter animal type (dog/monkey):");
+        System.out.println("Enter animal type (\"dog\" or \"monkey\"):");
         String animalType = scanner.nextLine().trim().toLowerCase();
 
-        if (!animalType.equals("dog") && !animalType.equals("monkey")) {
-            System.out.println("Invalid animal type entered.");
-            return;
-        }
+        System.out.println("Enter " + animalType + "'s name:");
+        String name = scanner.nextLine().trim();
 
-        System.out.println("Enter the name of the " + animalType + " you want to reserve:");
-        String animalName = scanner.nextLine().trim();
-
-        boolean animalFound = false;
-
+        // Reserve the animal if it exists
         if (animalType.equals("dog")) {
-            Dog dogToReserve = findDogByName(animalName);
-            if (dogToReserve != null) {
-                if (!dogToReserve.getReserved()) {
-                    dogToReserve.setReserved(true);
-                    updateDogReservationStatus(dogToReserve);
-                    System.out.println("Reservation for dog " + animalName + " successful.");
+            Dog dog = findDogByName(name);
+            if (dog != null) {
+                if (!dog.getReserved()) {
+                    dog.setReserved(true);
+                    System.out.println(name + " is now reserved.");
                 } else {
-                    System.out.println("Dog " + animalName + " is already reserved.");
+                    System.out.println(name + " is already reserved.");
                 }
-                animalFound = true;
+            } else {
+                System.out.println("Dog not found.");
             }
         } else if (animalType.equals("monkey")) {
-            Monkey monkeyToReserve = findMonkeyByName(animalName);
-            if (monkeyToReserve != null) {
-                if (!monkeyToReserve.getReserved()) {
-                    monkeyToReserve.setReserved(true);
-                    updateMonkeyReservationStatus(monkeyToReserve);
-                    System.out.println("Reservation for monkey " + animalName + " successful.");
+            Monkey monkey = findMonkeyByName(name);
+            if (monkey != null) {
+                if (!monkey.getReserved()) {
+                    monkey.setReserved(true);
+                    System.out.println(name + " is now reserved.");
                 } else {
-                    System.out.println("Monkey " + animalName + " is already reserved.");
+                    System.out.println(name + " is already reserved.");
                 }
-                animalFound = true;
+            } else {
+                System.out.println("Monkey not found.");
             }
+        } else {
+            System.out.println("Invalid animal type.");
         }
+    }
 
-        if (!animalFound) {
-            System.out.println("Animal " + animalName + " not found in the system.");
+    // Prints animals based on user input
+    public static void printAnimals(String animalType) {
+        if (animalType.equals("dog")) {
+            System.out.println("List of dogs:");
+            for (Dog dog : dogList) {
+                System.out.println(dog.getName());
+            }
+        } else if (animalType.equals("monkey")) {
+            System.out.println("List of monkeys:");
+            for (Monkey monkey : monkeyList) {
+                System.out.println(monkey.getName());
+            }
+        } else if (animalType.equals("available")) {
+            System.out.println("List of available dogs:");
+            for (Dog dog : dogList) {
+                if (!dog.getReserved()) {
+                    System.out.println(dog.getName());
+                }
+            }
+            System.out.println("List of available monkeys:");
+            for (Monkey monkey : monkeyList) {
+                if (!monkey.getReserved()) {
+                    System.out.println(monkey.getName());
+                }
+            }
+        } else {
+            System.out.println("Invalid animal type.");
         }
     }
     
@@ -343,176 +330,5 @@ public class Driver {
 
         // If the loop exits, the name was not found in the list, so return -1
         return -1;
-    }
-
-    // Updates dog's reservation status in the database
-    public static void updateDogReservationStatus(Dog dog) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = DatabaseUtil.getConnection();
-            String query = "UPDATE Dog SET reserved = ? WHERE name = ?";
-            ps = conn.prepareStatement(query);
-            ps.setBoolean(1, dog.getReserved());
-            ps.setString(2, dog.getName());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseUtil.closeResources(conn, ps, null);
-        }
-    }
-
-    // Updates monkey's reservation status in the database
-    public static void updateMonkeyReservationStatus(Monkey monkey) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = DatabaseUtil.getConnection();
-            String query = "UPDATE Monkey SET reserved = ? WHERE name = ?";
-            ps = conn.prepareStatement(query);
-            ps.setBoolean(1, monkey.getReserved());
-            ps.setString(2, monkey.getName());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseUtil.closeResources(conn, ps, null);
-        }
-    }
-    
-    // Print all dogs
-    public static void printAllDogs() {
-        System.out.println("List of all dogs:");
-        for (Dog dog : dogList) {
-            System.out.println(dog.toString());
-        }
-    }
-    
-    // Print all monkeys 
-    public static void printAllMonkeys() {
-        System.out.println("List of all monkeys:");
-        for (Monkey monkey : monkeyList) {
-            System.out.println(monkey.toString());
-        }
-    }
-    
-    // Print all available animals
-    public static void printAvailableAnimals() {
-        System.out.println("List of all available animals:");
-        System.out.println("Dogs:");
-        for (Dog dog : dogList) {
-            if (!dog.getReserved()) {
-                System.out.println(dog.toString());
-            }
-        }
-        System.out.println("Monkeys:");
-        for (Monkey monkey : monkeyList) {
-            if (!monkey.getReserved()) {
-                System.out.println(monkey.toString());
-            }
-        }
-    }
-    
-    
-    // Adds a new Dog object to the Dog table in the database and updates the local list
-    public static void addDogToDatabase(Dog newDog) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = DatabaseUtil.getConnection();
-            
-            // SQL query to insert a new dog into the Dog table
-            String query = "INSERT INTO Dog (name, breed, gender, age, weight, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            ps = conn.prepareStatement(query);
-            
-            // Set parameters for the prepared statement from the newDog object
-            ps.setString(1, newDog.getName());
-            ps.setString(2, newDog.getBreed());
-            ps.setString(3, newDog.getGender());
-            ps.setString(4, newDog.getAge());
-            ps.setString(5, newDog.getWeight());
-            ps.setString(6, newDog.getAcquisitionDate());
-            ps.setString(7, newDog.getAcquisitionLocation());
-            ps.setString(8, newDog.getTrainingStatus());
-            ps.setBoolean(9, newDog.getReserved());
-            ps.setString(10, newDog.getInServiceLocation());
-            
-            // Execute the SQL query to insert the new dog
-            ps.executeUpdate();
-            
-            // Add the new dog to the list
-            dogList.add(newDog);
-            
-            System.out.println("Dog " + newDog.getName() + " added to the database.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Close resources in the finally block to ensure they are always closed
-            DatabaseUtil.closeResources(conn, ps, null);
-        }
-    }
-    
-    // Adds a new Monkey object to the Monkey table in the database and updates the local list
-    public static void addMonkeyToDatabase(Monkey newMonkey) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = DatabaseUtil.getConnection();
-            
-            // SQL query to insert a new monkey into the Monkey table
-            String query = "INSERT INTO Monkey (name, species, gender, age, weight, height, bodyLength, tailLength, acquisitionDate, acquisitionCountry, trainingStatus, reserved, inServiceCountry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            ps = conn.prepareStatement(query);
-            
-            // Set parameters for the prepared statement from the newMonkey object
-            ps.setString(1, newMonkey.getName());
-            ps.setString(2, newMonkey.getSpecies());
-            ps.setString(3, newMonkey.getGender());
-            ps.setString(4, newMonkey.getAge());
-            ps.setString(5, newMonkey.getWeight());
-            ps.setString(6, newMonkey.getHeight());
-            ps.setString(7, newMonkey.getBodyLength());
-            ps.setString(8, newMonkey.getTailLength());
-            ps.setString(9, newMonkey.getAcquisitionDate());
-            ps.setString(10, newMonkey.getAcquisitionLocation());
-            ps.setString(11, newMonkey.getTrainingStatus());
-            ps.setBoolean(12, newMonkey.getReserved());
-            ps.setString(13, newMonkey.getInServiceLocation());
-            
-            // Execute the SQL query to insert the new monkey
-            ps.executeUpdate();
-            
-            // Add the new monkey to the list
-            monkeyList.add(newMonkey);
-            
-            System.out.println("Monkey " + newMonkey.getName() + " added to the database.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Close resources in the finally block to ensure they are always closed
-            DatabaseUtil.closeResources(conn, ps, null);
-        }
-    }
-    
-    // Checks if a specific animal (Dog or Monkey) with the given name is reserved.
-    public static boolean isReserved(String animalName, String animalType) {
-        if (animalType.equalsIgnoreCase("dog")) {
-            // Find the dog in the dogList by name
-            Dog dog = findDogByName(animalName);
-            return dog != null && dog.getReserved(); // Return true if dog exists and is reserved
-        } else if (animalType.equalsIgnoreCase("monkey")) {
-            // Find the monkey in the monkeyList by name
-            Monkey monkey = findMonkeyByName(animalName);
-            return monkey != null && monkey.getReserved(); // Return true if monkey exists and is reserved
-        } else {
-            System.out.println("Invalid animal type entered.");
-            return false;
-        }
     }
 }
