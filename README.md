@@ -1,4 +1,4 @@
-###### **Self Assesment**
+# **Self Assesment**
 
 
 In my academic journey, I have developed advanced knowledge and skills. Creating the portfolio showcases my unique abilities, skills, experiences, accomplishments, and knowledge while completing my bachelor’s degree at SNHU. Through the computer science and assignments of CS 499, I have increased my learning capacity to learn new things in a short period. It demonstrates my readiness to take on challenges in software development, algorithm database management, and cybersecurity. The audience will gain insight into problem-solving, technical expertise, and commitment to learning while enhancing in the computer science field. 
